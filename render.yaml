@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: python-quiz-app
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python seed.py
+    startCommand: gunicorn app:app
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.2
+      - key: DATABASE_PATH
+        value: quiz.db
+    # Note: On free-tier Render instances, the root filesystem is ephemeral across service rebuilds.
+    # To retain SQLite data across redeployments in production, attach a persistent disk:
+    # disk:
+    #   name: quiz-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    # and set DATABASE_PATH: /var/data/quiz.db

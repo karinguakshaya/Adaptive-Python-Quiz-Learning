@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Python Quiz Application - Akshaya (Mobile & Desktop)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+    }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body { 
+      background-color: var(--bg); 
+      color: var(--text); 
+      min-height: 100vh; 
+      min-height: 100dvh;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 16px 12px calc(24px + env(safe-area-inset-bottom, 0px)); 
+    }
+    .container { 
+      width: 100%; 
+      max-width: 820px; 
+    }
+    .header { 
+      text-align: center; 
+      margin-bottom: 20px; 
+    }
+    .header h1 { 
+      font-size: clamp(1.5rem, 5vw, 2.2rem); 
+      color: var(--primary); 
+      margin-bottom: 6px; 
+      letter-spacing: -0.5px; 
+    }
+    .header p { 
+      color: var(--text-muted); 
+      font-size: clamp(0.82rem, 2.8vw, 0.95rem); 
+    }
+    .db-status-pill { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px; 
+      background: rgba(56, 189, 248, 0.1); 
+      border: 1px solid rgba(56, 189, 248, 0.3); 
+      color: var(--primary); 
+      padding: 5px 12px; 
+      border-radius: 9999px; 
+      font-size: 0.78rem; 
+      margin-top: 8px; 
+      font-weight: 500; 
+      max-width: 100%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .db-status-dot { 
+      width: 8px; 
+      height: 8px; 
+      border-radius: 50%; 
+      background: var(--success); 
+      flex-shrink: 0;
+    }
+    .card { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      border-radius: 16px; 
+      padding: clamp(16px, 4vw, 28px); 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+    }
+    .meta-bar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px; 
+      font-size: 0.85rem; 
+      flex-wrap: wrap; 
+      gap: 8px; 
+    }
+    .badge { 
+      background: #1e3a8a; 
+      color: #93c5fd; 
+      padding: 4px 10px; 
+      border-radius: 9999px; 
+      font-weight: 600; 
+      font-size: 0.75rem; 
+    }
+    .badge-diff { 
+      background: #334155; 
+      color: #e2e8f0; 
+      padding: 4px 10px; 
+      border-radius: 9999px; 
+      font-weight: 600; 
+      font-size: 0.75rem; 
+    }
+    .timer { 
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+      font-size: 1.05rem; 
+      color: var(--accent); 
+      font-weight: 700; 
+      background: rgba(245, 158, 11, 0.1); 
+      padding: 4px 10px; 
+      border-radius: 6px; 
+      border: 1px solid rgba(245, 158, 11, 0.3); 
+    }
+    .timer.urgent { 
+      color: var(--danger); 
+      background: var(--danger-bg); 
+      border-color: var(--danger); 
+      animation: pulse 1s infinite; 
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    
+    .code-box { 
+      background: #020617; 
+      border: 1px solid #1e293b; 
+      border-radius: 10px; 
+      padding: 12px 14px; 
+      margin: 14px 0; 
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+      font-size: clamp(0.78rem, 2.5vw, 0.88rem); 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch;
+      color: #38bdf8; 
+      line-height: 1.5; 
+      white-space: pre-wrap; 
+      word-break: break-word;
+    }
+    .options { 
+      display: grid; 
+      gap: 10px; 
+      margin: 18px 0; 
+    }
+    .option-btn { 
+      background: #0f172a; 
+      border: 1px solid var(--border); 
+      color: var(--text); 
+      padding: 12px 14px; 
+      border-radius: 10px; 
+      text-align: left; 
+      cursor: pointer; 
+      transition: all 0.18s ease; 
+      font-size: clamp(0.85rem, 2.7vw, 0.95rem); 
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      min-height: 52px;
+      touch-action: manipulation;
+    }
+    .option-btn:active {
+      transform: scale(0.99);
+    }
+    @media (hover: hover) {
+      .option-btn:hover { 
+        border-color: var(--primary); 
+        background: #1e293b; 
+      }
+    }
+    .option-btn.selected { 
+      border-color: var(--primary); 
+      background: rgba(56, 189, 248, 0.18); 
+      font-weight: 600; 
+      box-shadow: 0 0 0 1px var(--primary); 
+    }
+    .option-letter { 
+      width: 28px; 
+      height: 28px; 
+      border-radius: 8px; 
+      background: #334155; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: 700; 
+      flex-shrink: 0; 
+      font-family: sans-serif; 
+      color: var(--text); 
+      font-size: 0.85rem;
+    }
+    .option-btn.selected .option-letter { 
+      background: var(--primary); 
+      color: #0f172a; 
+    }
+    .nav-bar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-top: 20px; 
+      padding-top: 16px; 
+      border-top: 1px solid var(--border); 
+      gap: 8px;
+    }
+    .btn { 
+      padding: 10px 18px; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      border: none; 
+      font-size: 0.9rem; 
+      transition: all 0.2s; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center;
+      gap: 6px; 
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: #334155; color: var(--text); }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-success { background: #059669; color: white; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    
+    .progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
+    .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+    .hint-box { font-size: 0.82rem; color: #94a3b8; background: rgba(30, 41, 59, 0.7); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 4px; margin-top: 12px; }
+    .alert-warn { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--accent); color: #fde68a; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-top: 12px; display: none; }
+    
+    /* Results Screen */
+    .results-card { text-align: center; }
+    .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; }
+    @media (min-width: 600px) {
+      .results-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .result-stat-box { background: #0f172a; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .stat-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; margin-top: 4px; }
+    .stat-val.primary { color: var(--primary); }
+    .stat-val.success { color: var(--success); }
+    .stat-val.danger { color: var(--danger); }
+    .stat-val.accent { color: var(--accent); }
+    .score-circle { font-size: clamp(2.8rem, 8vw, 3.8rem); font-weight: 900; color: var(--accent); margin: 8px 0 2px; }
+    .percentage { font-size: 1.2rem; color: var(--primary); font-weight: 600; margin-bottom: 8px; }
+    .grade-badge { display: inline-block; padding: 6px 14px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; margin-bottom: 20px; }
+    .grade-badge.pass { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+    .grade-badge.fail { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
+    
+    /* Review Section */
+    .review-section { margin-top: 28px; text-align: left; }
+    .review-header { font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .review-item { background: #0f172a; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+    .review-item.correct { border-left: 4px solid var(--success); }
+    .review-item.incorrect { border-left: 4px solid var(--danger); }
+    .review-status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.82rem; }
+    .review-choices { margin: 10px 0; font-size: 0.85rem; }
+    .review-choice { padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; display: flex; align-items: center; gap: 8px; word-break: break-word; }
+    .review-choice.user-pick { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .review-choice.correct-pick { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; font-weight: 600; }
+    .explanation-box { background: rgba(30, 41, 59, 0.6); border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.45; border-left: 3px solid var(--primary); margin-top: 8px; }
+    
+    /* Start Screen */
+    .start-screen { text-align: center; }
+    .rules-list { text-align: left; background: #0f172a; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin: 18px 0; }
+    .rules-list li { margin-left: 18px; margin-bottom: 8px; color: #cbd5e1; font-size: 0.88rem; }
+    .input-group { margin: 18px 0; text-align: left; }
+    .input-group label { display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+    .input-control { width: 100%; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 0.95rem; }
+    .input-control:focus { outline: none; border-color: var(--primary); }
+    
+    /* Mobile-Friendly Attempts Cards */
+    .attempt-card { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Custom Non-blocking Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 22px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+    }
+    .modal-backdrop.active .modal-box {
+      transform: scale(1);
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .modal-body { font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    .loading-spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: var(--primary); animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Python Quiz Application</h1>
+      <p>Candidate: <strong>Akshaya</strong> | DIGIT Innovations Internship Submission</p>
+      <div class="db-status-pill">
+        <span class="db-status-dot" id="db-dot"></span>
+        <span id="db-status-text">Checking Database Status...</span>
+      </div>
+    </div>
+
+    <!-- START SCREEN -->
+    <div id="start-container" class="card start-screen">
+      <h2 style="font-size: 1.35rem; margin-bottom: 8px; color: var(--primary);">Smart Adaptive Learning Quiz</h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem;">Python CS Concepts, Memory Semantics, OOP &amp; Control Flow</p>
+
+      <div class="rules-list">
+        <h3 style="font-size: 0.92rem; color: var(--text); margin-bottom: 10px;">Assessment Rules &amp; Features:</h3>
+        <ul>
+          <li><strong>10 Core Python Questions</strong> loaded live from SQLite database.</li>
+          <li><strong>15:00 Minutes Timer:</strong> Auto-submits when time expires.</li>
+          <li><strong>Mobile &amp; Touch Friendly:</strong> Tap options easily on iPhone or Android.</li>
+          <li><strong>Authoritative Validation:</strong> Answers evaluated with explanations.</li>
+          <li><strong>Offline Resilient:</strong> Works even when opening files directly on phone.</li>
+        </ul>
+      </div>
+
+      <div class="input-group" style="max-width: 360px; margin: 0 auto 18px;">
+        <label for="student-name-input">Student / Candidate Name:</label>
+        <input type="text" id="student-name-input" class="input-control" value="Akshaya" placeholder="Enter your name" />
+      </div>
+
+      <button id="start-btn" class="btn btn-primary" style="font-size: 1rem; width: 100%; max-width: 320px;" onclick="startQuiz()">
+        Start Quiz Now
+      </button>
+
+      <div style="margin-top: 18px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+        <button class="btn btn-outline" style="font-size: 0.82rem;" onclick="loadPastAttempts()">
+          View Previous Attempts
+        </button>
+      </div>
+
+      <div id="past-attempts-box" style="display: none; margin-top: 18px; text-align: left;">
+        <h4 style="font-size: 0.88rem; color: var(--primary); margin-bottom: 8px;">Saved Quiz Attempts:</h4>
+        <div id="past-attempts-list">Loading...</div>
+      </div>
+    </div>
+
+    <!-- QUIZ ACTIVE SCREEN -->
+    <div id="quiz-container" class="card" style="display: none;">
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill" style="width: 10%;"></div>
+      </div>
+
+      <div class="meta-bar">
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span id="topic-badge" class="badge">Variables</span>
+          <span id="diff-badge" class="badge-diff">Medium</span>
+        </div>
+        <span id="q-counter" style="font-weight: 600; color: var(--text-muted); font-size: 0.82rem;">Question 1 of 10</span>
+        <span id="timer" class="timer">15:00</span>
+      </div>
+
+      <h2 id="q-title" style="font-size: 1.05rem; line-height: 1.45; margin-bottom: 10px;"></h2>
+      
+      <div id="code-box" class="code-box" style="display: none;"></div>
+
+      <div id="options-container" class="options"></div>
+
+      <div id="hint-box" class="hint-box" style="display: none;"></div>
+
+      <div id="selection-warning" class="alert-warn">
+        Please select an option before proceeding to the next question.
+      </div>
+
+      <div class="nav-bar">
+        <button id="prev-btn" class="btn btn-secondary" onclick="prevQuestion()">Previous</button>
+        <div style="display: flex; gap: 8px;">
+          <button id="skip-btn" class="btn btn-outline" onclick="skipQuestion()">Skip</button>
+          <button id="next-btn" class="btn btn-primary" onclick="nextQuestion()">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-container" class="card results-card" style="display: none;">
+      <h2 style="font-size: 1.5rem; color: var(--text);">Quiz Evaluation Complete!</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Authoritative score evaluated and saved</p>
+
+      <div id="score-val" class="score-circle">0/10</div>
+      <div id="percent-val" class="percentage">0% Accuracy</div>
+      <div id="grade-badge" class="grade-badge pass">Grade: A+</div>
+
+      <div class="results-grid">
+        <div class="result-stat-box">
+          <div class="stat-label">Total Questions</div>
+          <div id="stat-total" class="stat-val primary">10</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="stat-label">Correct</div>
+          <div id="stat-correct" class="stat-val success">0</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="stat-label">Incorrect</div>
+          <div id="stat-incorrect" class="stat-val danger">0</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="stat-label">Time Taken</div>
+          <div id="stat-time" class="stat-val accent">0s</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+        <button class="btn btn-outline" onclick="loadPastAttempts(true)">Past Attempts History</button>
+      </div>
+
+      <div id="past-attempts-results-box" style="display: none; margin: 16px 0; text-align: left;"></div>
+
+      <!-- DETAILED QUESTION REVIEW SECTION -->
+      <div class="review-section">
+        <div class="review-header">
+          <span>Question-by-Question Detailed Review</span>
+          <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">Verified Explanations</span>
+        </div>
+        <div id="review-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM NON-BLOCKING MODAL DIALOG (No window.alert/confirm) -->
+  <div id="custom-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div id="modal-title" class="modal-title">Notice</div>
+      <div id="modal-body" class="modal-body">Message text goes here</div>
+      <div class="modal-actions">
+        <button id="modal-cancel-btn" class="btn btn-outline" style="display: none;" onclick="closeModal(false)">Cancel</button>
+        <button id="modal-ok-btn" class="btn btn-primary" onclick="closeModal(true)">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Embedded seed questions for offline/phone standalone resilience
+    const OFFLINE_SEED_QUESTIONS = [
+      {
+        "id": 1,
+        "topic": "Variables",
+        "difficulty": "Easy",
+        "question": "What is the value of x and y after executing the following multiple variable assignment?",
+        "codeSnippet": "x, y = 15, 30\nx, y = y, x + y",
+        "options": ["x = 30, y = 45", "x = 15, y = 45", "x = 30, y = 30", "SyntaxError: cannot assign simultaneously"],
+        "correctIndex": 0,
+        "explanation": "In Python, the right-hand side expressions are evaluated first from left to right as a tuple before any assignment occurs: (y, x + y) evaluates to (30, 45). Then, x is assigned 30 and y is assigned 45.",
+        "hint": "Remember that Python evaluates the right-hand side tuple first before binding variables."
+      },
+      {
+        "id": 2,
+        "topic": "Data Types",
+        "difficulty": "Medium",
+        "question": "Which of the following built-in Python data types is immutable (cannot be modified after creation)?",
+        "codeSnippet": "# Examining mutation attempts\nsample_a = [1, 2, 3]\nsample_b = {'a': 1, 'b': 2}\nsample_c = {1, 2, 3}\nsample_d = (1, 2, 3)",
+        "options": ["List [1, 2, 3]", "Dictionary {'a': 1}", "Set {1, 2, 3}", "Tuple (1, 2, 3)"],
+        "correctIndex": 3,
+        "explanation": "Tuples, strings, integers, floats, and frozensets are immutable in Python. Lists, dictionaries, and sets are mutable. Modifying an element of a tuple raises a TypeError.",
+        "hint": "Look for the sequence type defined with round parentheses () that does not support item assignment."
+      },
+      {
+        "id": 3,
+        "topic": "Operators",
+        "difficulty": "Easy",
+        "question": "What will be the output of the following arithmetic expressions involving Python operators?",
+        "codeSnippet": "result_1 = 19 // 4\nresult_2 = 2 ** 3 ** 2\nprint(result_1, result_2)",
+        "options": ["4 64", "4 512", "4.75 64", "4.75 512"],
+        "correctIndex": 1,
+        "explanation": "The // operator performs floor division (19 // 4 is 4). The exponentiation operator ** has right-to-left associativity: 2 ** (3 ** 2) = 2 ** 9 = 512.",
+        "hint": "Note that the power operator (**) evaluates from right to left, and // discards fractional parts."
+      },
+      {
+        "id": 4,
+        "topic": "Loops",
+        "difficulty": "Medium",
+        "question": "What is printed to the console when running this loop with an else clause?",
+        "codeSnippet": "numbers = [2, 4, 6, 8]\nfor n in numbers:\n    if n % 5 == 0:\n        print(\"Found multiple of 5\")\n        break\nelse:\n    print(\"No multiple found\")",
+        "options": ["Found multiple of 5", "No multiple found", "Found multiple of 5 followed by No multiple found", "No output because loop exits normally"],
+        "correctIndex": 1,
+        "explanation": "In Python, a loop's else block executes only if the loop completes all iterations without encountering a break statement. Since none of the numbers are divisible by 5, the break never triggers, so the else clause runs.",
+        "hint": "In Python, the loop else block runs only when the loop terminates naturally without a break."
+      },
+      {
+        "id": 5,
+        "topic": "Functions",
+        "difficulty": "Hard",
+        "question": "What does calling this function twice produce due to the default parameter behavior in Python?",
+        "codeSnippet": "def add_item(val, item_list=[]):\n    item_list.append(val)\n    return item_list\n\nfirst_call = add_item('Python')\nsecond_call = add_item('Flask')\nprint(second_call)",
+        "options": ["['Flask']", "['Python', 'Flask']", "['Python']", "TypeError: item_list cannot be reused"],
+        "correctIndex": 1,
+        "explanation": "Default argument values in Python are evaluated once at function definition time, not at each call. Because item_list defaults to a mutable list [], the same list object is retained and mutated across subsequent calls.",
+        "hint": "Default arguments are instantiated once when the function is defined, making mutable defaults persistent across calls."
+      },
+      {
+        "id": 6,
+        "topic": "Lists",
+        "difficulty": "Medium",
+        "question": "What is the output of the following list comprehension with step slicing?",
+        "codeSnippet": "data = [1, 2, 3, 4, 5, 6, 7, 8]\nsliced = data[1:7:2]\nreversed_comp = [x * 10 for x in sliced[::-1]]\nprint(reversed_comp)",
+        "options": ["[60, 40, 20]", "[80, 60, 40, 20]", "[20, 40, 60]", "[70, 50, 30]"],
+        "correctIndex": 0,
+        "explanation": "data[1:7:2] takes elements from index 1 to 6 with a step of 2, producing [2, 4, 6]. Next, sliced[::-1] reverses this to [6, 4, 2]. The comprehension multiplies each by 10, producing [60, 40, 20].",
+        "hint": "Break it into 3 steps: step slice index 1, 3, 5; then reverse with [::-1]; then multiply by 10."
+      },
+      {
+        "id": 7,
+        "topic": "OOP",
+        "difficulty": "Medium",
+        "question": "In Python Object-Oriented Programming, what is the role of the 'self' parameter in instance methods?",
+        "codeSnippet": "class Student:\n    def __init__(self, name, score):\n        self.name = name\n        self.score = score\n\n    def display(self):\n        return f\"{self.name}: {self.score}\"",
+        "options": [
+          "It represents the specific instance of the class upon which the method is called",
+          "It is a global keyword required by the Python compiler for static methods",
+          "It creates a duplicate copy of the class in system memory",
+          "It is an optional variable that holds the class name"
+        ],
+        "correctIndex": 0,
+        "explanation": "'self' represents the specific instance of the class. It binds attributes and methods to the individual object instance upon which the method was called.",
+        "hint": "Think about how instance attributes are bound to individual objects created from a class template."
+      },
+      {
+        "id": 8,
+        "topic": "OOP",
+        "difficulty": "Hard",
+        "question": "What will be the output when calling the get_info() method on an instance of Developer?",
+        "codeSnippet": "class Employee:\n    role = \"Staff\"\n    def __init__(self, name):\n        self.name = name\n\n    def get_info(self):\n        return f\"{self.name} - {self.role}\"\n\nclass Developer(Employee):\n    role = \"Software Engineer\"\n    def get_info(self):\n        parent_info = super().get_info()\n        return f\"Tech Dept: {parent_info}\"\n\ndev = Developer(\"Akshaya\")\nprint(dev.get_info())",
+        "options": [
+          "Tech Dept: Akshaya - Software Engineer",
+          "Tech Dept: Akshaya - Staff",
+          "Akshaya - Software Engineer",
+          "AttributeError: super() cannot resolve role attribute"
+        ],
+        "correctIndex": 0,
+        "explanation": "super().get_info() calls the parent Employee method, but 'self' is still the Developer instance dev where 'role' is overridden as 'Software Engineer'. Hence it prints 'Tech Dept: Akshaya - Software Engineer'.",
+        "hint": "Even when calling super(), self still points to the subclass instance where role is overridden."
+      },
+      {
+        "id": 9,
+        "topic": "OOP",
+        "difficulty": "Medium",
+        "question": "Which special dunder method is invoked when an object is passed to str() or print() for user-friendly string representation?",
+        "codeSnippet": "class Book:\n    def __init__(self, title, author):\n        self.title = title\n        self.author = author\n\n    # Which method goes here to format: \"Python Guide by Guido\"?\n    def ________(self):\n        return f\"{self.title} by {self.author}\"",
+        "options": ["__str__(self)", "__repr__(self)", "__format__(self)", "__print__(self)"],
+        "correctIndex": 0,
+        "explanation": "The __str__() dunder method returns an informal, human-readable string representation of an object when passed to str() or print(). __repr__() is typically used for debugging.",
+        "hint": "The method name matches the built-in function str() surrounded by double underscores."
+      },
+      {
+        "id": 10,
+        "topic": "Functions",
+        "difficulty": "Medium",
+        "question": "What is the output of the following function utilizing variable-length arguments (*args and **kwargs)?",
+        "codeSnippet": "def calculate_metrics(*args, **kwargs):\n    multiplier = kwargs.get('factor', 1)\n    return sum(args) * multiplier\n\nres1 = calculate_metrics(5, 10, 15)\nres2 = calculate_metrics(2, 3, factor=4)\nprint(res1, res2)",
+        "options": ["30 20", "30 14", "0 20", "TypeError: invalid keyword argument"],
+        "correctIndex": 0,
+        "explanation": "*args packs positional arguments into a tuple (5, 10, 15 -> sum 30; factor=1 -> 30). **kwargs collects keyword arguments (2, 3 -> sum 5; factor=4 -> 20). The output is 30 20.",
+        "hint": "*args packs positional parameters into a tuple, and kwargs.get('factor', 1) safely reads the optional multiplier."
+      }
+    ];
+
+    // State
+    let isOfflineMode = false;
+    let questions = [];
+    let currentIdx = 0;
+    let userAnswers = {};
+    let timerInterval = null;
+    let timeLeft = 900;
+    let startTime = null;
+    let attemptUuid = null;
+    let isSubmitting = false;
+    let modalResolver = null;
+
+    // Non-blocking modal system
+    function showModal(title, message, isConfirm = false) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-body').innerText = message;
+      document.getElementById('modal-cancel-btn').style.display = isConfirm ? 'inline-flex' : 'none';
+      document.getElementById('custom-modal').classList.add('active');
+
+      return new Promise((resolve) => {
+        modalResolver = resolve;
+      });
+    }
+
+    function closeModal(result) {
+      document.getElementById('custom-modal').classList.remove('active');
+      if (modalResolver) {
+        modalResolver(result);
+        modalResolver = null;
+      }
+    }
+
+    // Initialize & verify database
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/health')
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'healthy') {
+            document.getElementById('db-status-text').innerText = 
+              `SQLite Database Connected (${data.total_questions_in_db} Questions Seeded)`;
+          }
+        })
+        .catch(() => {
+          isOfflineMode = true;
+          document.getElementById('db-status-text').innerText = 'Mobile Standalone Mode (Active)';
+          document.getElementById('db-dot').style.backgroundColor = '#38bdf8';
+        });
+    });
+
+    function generateUuid() {
+      return 'attempt-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    async function startQuiz() {
+      const studentInput = document.getElementById('student-name-input').value.trim();
+      const studentName = studentInput || 'Akshaya';
+      attemptUuid = generateUuid();
+      isSubmitting = false;
+      userAnswers = {};
+      currentIdx = 0;
+      timeLeft = 900;
+
+      const startBtn = document.getElementById('start-btn');
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<span class="loading-spinner"></span> Loading Questions...';
+
+      try {
+        if (!isOfflineMode) {
+          const response = await fetch('/api/questions').catch(() => null);
+          if (response && response.ok) {
+            const data = await response.json();
+            if (data.questions && data.questions.length > 0) {
+              questions = data.questions;
+            } else {
+              questions = OFFLINE_SEED_QUESTIONS.map(q => ({
+                id: q.id,
+                topic: q.topic,
+                difficulty: q.difficulty,
+                question: q.question,
+                codeSnippet: q.codeSnippet,
+                options: q.options,
+                hint: q.hint
+              }));
+            }
+          } else {
+            isOfflineMode = true;
+            questions = OFFLINE_SEED_QUESTIONS;
+          }
+        } else {
+          questions = OFFLINE_SEED_QUESTIONS;
+        }
+
+        document.getElementById('start-container').style.display = 'none';
+        document.getElementById('results-container').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'block';
+
+        startTime = Date.now();
+        startTimer();
+        renderQuestion();
+      } catch (err) {
+        await showModal('Loading Notice', 'Running with standard quiz bank: ' + err.message);
+        questions = OFFLINE_SEED_QUESTIONS;
+        renderQuestion();
+      } finally {
+        startBtn.disabled = false;
+        startBtn.innerText = 'Start Quiz Now';
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timeLeft = 0;
+          updateTimerDisplay();
+          showModal('Time Expired', '15:00 minutes have elapsed! Auto-submitting your quiz.').then(() => {
+            submitQuiz(true);
+          });
+        } else {
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById('timer');
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
+      timerEl.innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+
+      if (timeLeft <= 60) {
+        timerEl.classList.add('urgent');
+      } else {
+        timerEl.classList.remove('urgent');
+      }
+    }
+
+    function renderQuestion() {
+      if (!questions || questions.length === 0) return;
+      const q = questions[currentIdx];
+
+      document.getElementById('selection-warning').style.display = 'none';
+      document.getElementById('topic-badge').innerText = q.topic;
+      document.getElementById('diff-badge').innerText = q.difficulty || 'Medium';
+      document.getElementById('q-counter').innerText = `Question ${currentIdx + 1} of ${questions.length}`;
+
+      const progressPct = ((currentIdx + 1) / questions.length) * 100;
+      document.getElementById('progress-fill').style.width = `${progressPct}%`;
+
+      document.getElementById('q-title').innerText = q.question;
+
+      const codeBox = document.getElementById('code-box');
+      if (q.codeSnippet) {
+        codeBox.style.display = 'block';
+        codeBox.innerText = q.codeSnippet;
+      } else {
+        codeBox.style.display = 'none';
+      }
+
+      const hintBox = document.getElementById('hint-box');
+      if (q.hint) {
+        hintBox.style.display = 'block';
+        hintBox.innerHTML = `<strong>Hint:</strong> ${q.hint}`;
+      } else {
+        hintBox.style.display = 'none';
+      }
+
+      const optionsDiv = document.getElementById('options-container');
+      optionsDiv.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      q.options.forEach((optText, optIdx) => {
+        const btn = document.createElement('div');
+        const isSelected = (userAnswers[q.id] === optIdx);
+        btn.className = 'option-btn' + (isSelected ? ' selected' : '');
+        btn.innerHTML = `
+          <span class="option-letter">${letters[optIdx]}</span>
+          <span>${optText}</span>
+        `;
+        btn.onclick = () => selectOption(optIdx);
+        optionsDiv.appendChild(btn);
+      });
+
+      const prevBtn = document.getElementById('prev-btn');
+      prevBtn.style.visibility = (currentIdx === 0) ? 'hidden' : 'visible';
+
+      const nextBtn = document.getElementById('next-btn');
+      if (currentIdx === questions.length - 1) {
+        nextBtn.innerText = 'Submit Quiz';
+        nextBtn.className = 'btn btn-success';
+      } else {
+        nextBtn.innerText = 'Next';
+        nextBtn.className = 'btn btn-primary';
+      }
+    }
+
+    function selectOption(idx) {
+      const q = questions[currentIdx];
+      userAnswers[q.id] = idx;
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(25);
+      }
+      document.getElementById('selection-warning').style.display = 'none';
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentIdx > 0) {
+        currentIdx--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      const q = questions[currentIdx];
+      if (userAnswers[q.id] === undefined) {
+        document.getElementById('selection-warning').style.display = 'block';
+        return;
+      }
+
+      if (currentIdx < questions.length - 1) {
+        currentIdx++;
+        renderQuestion();
+      } else {
+        submitQuiz(false);
+      }
+    }
+
+    async function skipQuestion() {
+      if (currentIdx < questions.length - 1) {
+        currentIdx++;
+        renderQuestion();
+      } else {
+        const confirmed = await showModal('Submit Quiz?', 'You are on the final question. Would you like to submit your quiz now?', true);
+        if (confirmed) {
+          submitQuiz(false);
+        }
+      }
+    }
+
+    async function submitQuiz(forced = false) {
+      if (isSubmitting) return;
+      isSubmitting = true;
+      clearInterval(timerInterval);
+
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '<span class="loading-spinner"></span> Evaluating...';
+
+      const studentName = document.getElementById('student-name-input').value.trim() || 'Akshaya';
+      const timeTaken = Math.max(1, Math.round((Date.now() - startTime) / 1000));
+
+      const payload = {
+        attemptUuid: attemptUuid,
+        studentName: studentName,
+        timeTakenSeconds: timeTaken,
+        answers: userAnswers
+      };
+
+      try {
+        if (!isOfflineMode) {
+          const response = await fetch('/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }).catch(() => null);
+
+          if (response && response.ok) {
+            const data = await response.json();
+            renderResults(data);
+            return;
+          }
+        }
+
+        // Offline / Phone Standalone evaluation fallback
+        const offlineResults = evaluateOffline(payload);
+        renderResults(offlineResults);
+      } catch (err) {
+        const offlineResults = evaluateOffline(payload);
+        renderResults(offlineResults);
+      }
+    }
+
+    function evaluateOffline(payload) {
+      let score = 0;
+      const total = OFFLINE_SEED_QUESTIONS.length;
+      const results = OFFLINE_SEED_QUESTIONS.map(q => {
+        const userChoice = payload.answers[q.id];
+        const isCorrect = (userChoice === q.correctIndex);
+        if (isCorrect) score++;
+        return {
+          questionId: q.id,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          codeSnippet: q.codeSnippet,
+          options: q.options,
+          userChoice: userChoice !== undefined ? userChoice : null,
+          correctChoice: q.correctIndex,
+          isCorrect: isCorrect,
+          explanation: q.explanation
+        };
+      });
+
+      const percentage = Math.round((score / total) * 100);
+      let grade = 'D (Needs Improvement)';
+      if (percentage >= 90) grade = 'A+ (Outstanding)';
+      else if (percentage >= 80) grade = 'A (Excellent)';
+      else if (percentage >= 60) grade = 'B (Good)';
+      else if (percentage >= 40) grade = 'C (Satisfactory)';
+
+      const record = {
+        status: 'success',
+        attemptId: Date.now(),
+        attemptUuid: payload.attemptUuid,
+        studentName: payload.studentName,
+        score: score,
+        total: total,
+        correctAnswers: score,
+        incorrectAnswers: total - score,
+        percentage: percentage,
+        grade: grade,
+        passed: percentage >= 60,
+        timeTakenSeconds: payload.timeTakenSeconds,
+        results: results
+      };
+
+      try {
+        const saved = JSON.parse(localStorage.getItem('quiz_attempts') || '[]');
+        saved.unshift({
+          id: saved.length + 1,
+          student_name: record.studentName,
+          score: record.score,
+          total_questions: record.total,
+          percentage: record.percentage,
+          grade: record.grade,
+          passed: record.passed ? 1 : 0,
+          time_taken_seconds: record.timeTakenSeconds,
+          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        });
+        localStorage.setItem('quiz_attempts', JSON.stringify(saved.slice(0, 30)));
+      } catch (e) {}
+
+      return record;
+    }
+
+    function renderResults(data) {
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('results-container').style.display = 'block';
+
+      document.getElementById('score-val').innerText = `${data.score} / ${data.total}`;
+      document.getElementById('percent-val').innerText = `${data.percentage}% Accuracy`;
+      
+      const gradeBadge = document.getElementById('grade-badge');
+      gradeBadge.innerText = `Performance Rating: ${data.grade}`;
+      gradeBadge.className = data.passed ? 'grade-badge pass' : 'grade-badge fail';
+
+      document.getElementById('stat-total').innerText = data.total;
+      document.getElementById('stat-correct').innerText = data.correctAnswers;
+      document.getElementById('stat-incorrect').innerText = data.incorrectAnswers;
+      document.getElementById('stat-time').innerText = `${data.timeTakenSeconds}s`;
+
+      const reviewContainer = document.getElementById('review-list');
+      reviewContainer.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      data.results.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = `review-item ${item.isCorrect ? 'correct' : 'incorrect'}`;
+
+        let codeHtml = '';
+        if (item.codeSnippet) {
+          codeHtml = `<div class="code-box">${item.codeSnippet}</div>`;
+        }
+
+        const userPickText = item.userChoice !== null && item.userChoice !== undefined
+          ? `${letters[item.userChoice]}: ${item.options[item.userChoice]}`
+          : '<em style="color: #94a3b8;">(Unanswered / Skipped)</em>';
+
+        const correctPickText = `${letters[item.correctChoice]}: ${item.options[item.correctChoice]}`;
+
+        div.innerHTML = `
+          <div class="review-status-bar">
+            <span><strong>Q${idx + 1}.</strong> ${item.topic} &bull; <span style="color: var(--text-muted);">${item.difficulty}</span></span>
+            <span style="font-weight: 700; color: ${item.isCorrect ? 'var(--success)' : 'var(--danger)'};">
+              ${item.isCorrect ? '&#10004; Correct' : '&#10008; Incorrect'}
+            </span>
+          </div>
+
+          <div style="font-size: 0.95rem; font-weight: 500; margin-bottom: 8px;">${item.question}</div>
+          ${codeHtml}
+
+          <div class="review-choices">
+            <div class="review-choice ${item.isCorrect ? 'correct-pick' : 'user-pick'}">
+              <strong>Your Answer:</strong> ${userPickText}
+            </div>
+            ${!item.isCorrect ? `
+              <div class="review-choice correct-pick">
+                <strong>Correct Answer:</strong> ${correctPickText}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="explanation-box">
+            <strong>Explanation:</strong> ${item.explanation}
+          </div>
+        `;
+
+        reviewContainer.appendChild(div);
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function restartQuiz() {
+      clearInterval(timerInterval);
+      document.getElementById('results-container').style.display = 'none';
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('start-container').style.display = 'block';
+      userAnswers = {};
+      currentIdx = 0;
+      timeLeft = 900;
+      isSubmitting = false;
+      document.getElementById('past-attempts-box').style.display = 'none';
+    }
+
+    async function loadPastAttempts(inResults = false) {
+      const targetDiv = inResults 
+        ? document.getElementById('past-attempts-results-box')
+        : document.getElementById('past-attempts-box');
+      
+      targetDiv.style.display = 'block';
+      targetDiv.innerHTML = '<div style="color: var(--text-muted);"><span class="loading-spinner"></span> Loading previous records...</div>';
+
+      try {
+        let attempts = [];
+        if (!isOfflineMode) {
+          const res = await fetch('/api/attempts?limit=10').catch(() => null);
+          if (res && res.ok) {
+            const data = await res.json();
+            attempts = data.attempts || [];
+          }
+        }
+
+        if (attempts.length === 0) {
+          attempts = JSON.parse(localStorage.getItem('quiz_attempts') || '[]');
+        }
+
+        if (attempts.length === 0) {
+          targetDiv.innerHTML = '<p style="color: var(--text-muted); padding: 8px;">No previous quiz attempts recorded yet.</p>';
+          return;
+        }
+
+        let html = '';
+        attempts.forEach(att => {
+          html += `
+            <div class="attempt-card">
+              <div>
+                <strong>${att.student_name}</strong> - <span style="color: ${att.passed ? 'var(--success)' : 'var(--danger)'}; font-weight: 700;">${att.score}/${att.total_questions} (${att.percentage}%)</span>
+                <div style="color: var(--text-muted); font-size: 0.75rem;">${att.grade} &bull; ${att.time_taken_seconds}s</div>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-align: right;">${att.created_at || 'Recent'}</div>
+            </div>
+          `;
+        });
+        targetDiv.innerHTML = html;
+      } catch (err) {
+        targetDiv.innerHTML = `<p style="color: var(--danger);">Failed to load attempts: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

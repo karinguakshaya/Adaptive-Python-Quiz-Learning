@@ -1,0 +1,9 @@
+PUBLIC SHAREABLE URL FOR INTERNSHIP SUBMISSION:
+https://ais-pre-p67ax6eq33qolvrmngkczb-989727123617.asia-east1.run.app
+
+Candidate Name: Akshaya
+Project: Python Quiz Application - DIGIT Innovations Internship Assignment
+Submission Date: October 29, 2026
+Level 1 Requirements: Complete & Fully Verified
+Automated Tests: 13 / 13 Passed (pytest)
+Database: SQLite (quiz.db) with 10 questions and persistent attempt storage
